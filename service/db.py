@@ -67,5 +67,17 @@ class Database:
             cursor = conn.cursor()
             cursor.execute("SELECT is_active, stream_url FROM stream WHERE id = 1")
             return cursor.fetchone()
+        
+    def get_admin_ids_by_usernames(self, usernames: list[str]) -> list[int]:
+        with sqlite3.connect(self.db_name) as conn:
+            cursor = conn.cursor()
+            # Создаем плейсхолдеры (?, ?, ?) под количество никнеймов
+            placeholders = ', '.join('?' for _ in usernames)
+            query = f"SELECT telegram_id FROM users WHERE username IN ({placeholders})"
+            
+            cursor.execute(query, usernames)
+            results = cursor.fetchall()
+            # Превращаем список кортежей [(123,), (456,)] в обычный список [123, 456]
+            return [row[0] for row in results]
 
 db = Database()
